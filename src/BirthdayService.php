@@ -7,9 +7,24 @@ class BirthdayService
      */
     private $mailer;
 
-    public function sendGreetings($fileName, XDate $xDate, $smtpHost, $smtpPort)
+    /**
+     * @var FileEmployeeRepository
+     */
+    private $repository;
+
+    /**
+     * Class constructor
+     *
+     * @param FileEmployeeRepository $aFileEmployeeRepository
+     */
+    public function __construct(FileEmployeeRepository $aFileEmployeeRepository)
     {
-        $employees = $this->findEmployeesWhoseBirthdayIs($xDate, $fileName);
+        $this->repository = $aFileEmployeeRepository;
+    }
+
+    public function sendGreetings(XDate $xDate, $smtpHost, $smtpPort)
+    {
+        $employees = $this->repository->findEmployeesWhoseBirthdayIs($xDate);
 
         foreach ($employees as $employee) {
             $recipient = $employee->getEmail();
@@ -40,11 +55,5 @@ class BirthdayService
     protected function doSendMessage(Swift_Message $msg)
     {
         $this->mailer->send($msg);
-    }
-
-    private function findEmployeesWhoseBirthdayIs(XDate $xDate, $fileName)
-    {
-        $repository = new FileEmployeeRepository($fileName);
-        return $repository->findEmployeesWhoseBirthdayIs($xDate);
     }
 }
