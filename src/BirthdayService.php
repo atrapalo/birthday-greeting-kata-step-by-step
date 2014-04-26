@@ -15,9 +15,9 @@ class BirthdayService
     /**
      * Class constructor
      *
-     * @param FileEmployeeRepository $aFileEmployeeRepository
+     * @param EmployeeRepository $aFileEmployeeRepository
      */
-    public function __construct(FileEmployeeRepository $aFileEmployeeRepository)
+    public function __construct(EmployeeRepository $aFileEmployeeRepository)
     {
         $this->repository = $aFileEmployeeRepository;
     }

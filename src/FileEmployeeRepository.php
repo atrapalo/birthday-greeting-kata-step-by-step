@@ -1,6 +1,6 @@
 <?php
 
-class FileEmployeeRepository
+class FileEmployeeRepository implements EmployeeRepository
 {
     /**
      * @var string
