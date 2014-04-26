@@ -2,9 +2,24 @@
 
 class FileEmployeeRepository
 {
-    public function findEmployeesWhoseBirthdayIs(XDate $xDate, $fileName)
+    /**
+     * @var string
+     */
+    private $fileName;
+
+    /**
+     * Class constructor
+     *
+     * @param string $fileName
+     */
+    public function __construct($fileName)
     {
-        $fileHandler = fopen($fileName, 'r');
+        $this->fileName = $fileName;
+    }
+
+    public function findEmployeesWhoseBirthdayIs(XDate $xDate)
+    {
+        $fileHandler = fopen($this->fileName, 'r');
         fgetcsv($fileHandler);
 
         $employees = [];

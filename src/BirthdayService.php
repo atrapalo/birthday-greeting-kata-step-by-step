@@ -44,7 +44,7 @@ class BirthdayService
 
     private function findEmployeesWhoseBirthdayIs(XDate $xDate, $fileName)
     {
-        $repository = new FileEmployeeRepository();
-        return $repository->findEmployeesWhoseBirthdayIs($xDate, $fileName);
+        $repository = new FileEmployeeRepository($fileName);
+        return $repository->findEmployeesWhoseBirthdayIs($xDate);
     }
 }
