@@ -16,9 +16,9 @@ class BirthdayService
      * Class constructor
      *
      * @param EmployeeRepository $aFileEmployeeRepository
-     * @param SwiftMessageSender $aNotifier
+     * @param MessageSender $aNotifier
      */
-    public function __construct(EmployeeRepository $aFileEmployeeRepository, SwiftMessageSender $aNotifier)
+    public function __construct(EmployeeRepository $aFileEmployeeRepository, MessageSender $aNotifier)
     {
         $this->repository = $aFileEmployeeRepository;
         $this->notifier = $aNotifier;
@@ -38,10 +38,7 @@ class BirthdayService
 
     private function sendMessage($sender, $subject, $body, $recipient)
     {
-        $msg = $this->notifier->createMessage($subject, $sender, $recipient, $body);
-
-        // Send the message
-        $this->doSendMessage($msg);
+        $this->notifier->send($subject, $sender, $recipient, $body);
     }
 
     // made protected for testing :-(

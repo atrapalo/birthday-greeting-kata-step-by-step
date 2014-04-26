@@ -1,6 +1,6 @@
 <?php
 
-class SwiftMessageSender
+class SwiftMessageSender implements MessageSender
 {
     /**
      * @var string
@@ -29,7 +29,7 @@ class SwiftMessageSender
         return Swift_Mailer::newInstance(Swift_SmtpTransport::newInstance($smtpHost, $smtpPort));
     }
 
-    public function createMessage($subject, $sender, $recipient, $body)
+    private function createMessage($subject, $sender, $recipient, $body)
     {
         $msg = Swift_Message::newInstance($subject);
         $msg
@@ -41,9 +41,9 @@ class SwiftMessageSender
         return $msg;
     }
 
-    public function send(Swift_Message $aMessage)
+    public function send($subject, $sender, $recipient, $body)
     {
         $mailer = $this->createMailer($this->smtpHost, $this->smtpPort);
-        $mailer->send($aMessage);
+        $mailer->send($this->createMessage($subject, $sender, $recipient, $body));
     }
 }

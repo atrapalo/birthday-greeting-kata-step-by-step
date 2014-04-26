@@ -8,9 +8,9 @@ class AcceptanceTest extends PHPUnit_Framework_TestCase
     private static $SMTP_PORT = 25;
 
     /**
-     * @var Swift_Message[]
+     * @var MessageSenderSpy
      */
-    private $messagesSent = [];
+    private $messageSenderSpy;
 
     /**
      * @var BirthdayService
@@ -19,21 +19,17 @@ class AcceptanceTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $messageHandler = function (Swift_Message $msg) {
-            $this->messagesSent[] = $msg;
-        };
+        $this->messageSenderSpy = new MessageSenderSpy();
 
-        $this->service = new TestableBirthdayService(
+        $this->service = new BirthdayService(
             new FileEmployeeRepository(__DIR__ . '/resources/employee_data.txt'),
-            new SwiftMessageSender('localhost', static::$SMTP_PORT)
+            $this->messageSenderSpy
         );
-
-        $this->service->setMessageHandler($messageHandler->bindTo($this));
     }
 
     public function tearDown()
     {
-        $this->service = $this->messagesSent = null;
+        $this->service = $this->messageSenderSpy = null;
     }
 
     /**
@@ -41,10 +37,11 @@ class AcceptanceTest extends PHPUnit_Framework_TestCase
      */
     public function willSendGreetings_whenItsSomebodysBirthday()
     {
-        $this->service->sendGreetings(new XDate('2008/10/08'), 'localhost', static::$SMTP_PORT);
+        $this->service->sendGreetings(new XDate('2008/10/08'));
 
-        $this->assertCount(1, $this->messagesSent, 'message not sent?');
-        $message = $this->messagesSent[0];
+        $messagesSent = $this->messageSenderSpy->getMessagesSent();
+        $this->assertCount(1, $messagesSent, 'message not sent?');
+        $message = $messagesSent[0];
         $this->assertEquals('Happy Birthday, dear John!', $message->getBody());
         $this->assertEquals('Happy Birthday!', $message->getSubject());
         $this->assertCount(1, $message->getTo());
@@ -56,29 +53,33 @@ class AcceptanceTest extends PHPUnit_Framework_TestCase
      */
     public function willNotSendEmailsWhenNobodysBirthday()
     {
-        $this->service->sendGreetings(new XDate('2008/01/01'), 'localhost', static::$SMTP_PORT);
+        $this->service->sendGreetings(new XDate('2008/01/01'));
 
-        $this->assertCount(0, $this->messagesSent, 'what? messages?');
+        $this->assertCount(0, $messagesSent = $this->messageSenderSpy->getMessagesSent(), 'what? messages?');
     }
 }
 
-class TestableBirthdayService extends BirthdayService
+class MessageSenderSpy implements MessageSender
 {
-    /**
-     * @var Closure
-     */
-    private $callback;
+    private $messagesSent = [];
 
-    public function setMessageHandler(Closure $callback)
+    public function send($subject, $sender, $recipient, $body)
     {
-        $this->callback = $callback;
+        $msg = Swift_Message::newInstance($subject);
+        $msg
+            ->setFrom($sender)
+            ->setTo([$recipient])
+            ->setBody($body)
+        ;
 
-        return $this;
+        $this->messagesSent[] = $msg;
     }
 
-    protected function doSendMessage(Swift_Message $msg)
+    /**
+     * @return array
+     */
+    public function getMessagesSent()
     {
-        $callable = $this->callback;
-        $callable($msg);
+        return $this->messagesSent;
     }
 }
