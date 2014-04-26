@@ -40,10 +40,4 @@ class BirthdayService
     {
         $this->notifier->send($subject, $sender, $recipient, $body);
     }
-
-    // made protected for testing :-(
-    protected function doSendMessage(Swift_Message $msg)
-    {
-        $this->notifier->send($msg);
-    }
 }
