@@ -3,11 +3,6 @@
 class BirthdayService
 {
     /**
-     * @var Swift_Mailer
-     */
-    private $mailer;
-
-    /**
      * @var FileEmployeeRepository
      */
     private $repository;
@@ -21,13 +16,15 @@ class BirthdayService
      * Class constructor
      *
      * @param EmployeeRepository $aFileEmployeeRepository
+     * @param SwiftMessageSender $aNotifier
      */
-    public function __construct(EmployeeRepository $aFileEmployeeRepository)
+    public function __construct(EmployeeRepository $aFileEmployeeRepository, SwiftMessageSender $aNotifier)
     {
         $this->repository = $aFileEmployeeRepository;
+        $this->notifier = $aNotifier;
     }
 
-    public function sendGreetings(XDate $xDate, $smtpHost, $smtpPort)
+    public function sendGreetings(XDate $xDate)
     {
         $employees = $this->repository->findEmployeesWhoseBirthdayIs($xDate);
 
@@ -35,14 +32,12 @@ class BirthdayService
             $recipient = $employee->getEmail();
             $body = sprintf('Happy Birthday, dear %s!', $employee->getFirstName());
             $subject = 'Happy Birthday!';
-            $this->sendMessage($smtpHost, $smtpPort, 'sender@here.com', $subject, $body, $recipient);
+            $this->sendMessage('sender@here.com', $subject, $body, $recipient);
         }
     }
 
-    private function sendMessage($smtpHost, $smtpPort, $sender, $subject, $body, $recipient)
+    private function sendMessage($sender, $subject, $body, $recipient)
     {
-        $this->notifier = new SwiftMessageSender($smtpHost, $smtpPort);
-
         $msg = $this->notifier->createMessage($subject, $sender, $recipient, $body);
 
         // Send the message

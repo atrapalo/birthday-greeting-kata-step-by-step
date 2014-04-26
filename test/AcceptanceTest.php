@@ -24,7 +24,8 @@ class AcceptanceTest extends PHPUnit_Framework_TestCase
         };
 
         $this->service = new TestableBirthdayService(
-            new FileEmployeeRepository(__DIR__ . '/resources/employee_data.txt')
+            new FileEmployeeRepository(__DIR__ . '/resources/employee_data.txt'),
+            new SwiftMessageSender('localhost', static::$SMTP_PORT)
         );
 
         $this->service->setMessageHandler($messageHandler->bindTo($this));
