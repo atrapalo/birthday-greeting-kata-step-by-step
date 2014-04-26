@@ -13,6 +13,11 @@ class BirthdayService
     private $repository;
 
     /**
+     * @var SwiftMessageSender
+     */
+    private $notifier;
+
+    /**
      * Class constructor
      *
      * @param EmployeeRepository $aFileEmployeeRepository
@@ -36,11 +41,9 @@ class BirthdayService
 
     private function sendMessage($smtpHost, $smtpPort, $sender, $subject, $body, $recipient)
     {
-        // Create a mail session
-        $this->mailer = $this->createMailer($smtpHost, $smtpPort);
+        $this->notifier = new SwiftMessageSender($smtpHost, $smtpPort);
 
-        // Construct the message
-        $msg = $this->createMessage($subject, $sender, $recipient, $body);
+        $msg = $this->notifier->createMessage($subject, $sender, $recipient, $body);
 
         // Send the message
         $this->doSendMessage($msg);
@@ -49,35 +52,6 @@ class BirthdayService
     // made protected for testing :-(
     protected function doSendMessage(Swift_Message $msg)
     {
-        $this->mailer->send($msg);
-    }
-
-    /**
-     * @param $smtpHost
-     * @param $smtpPort
-     * @return Swift_Mailer
-     */
-    private function createMailer($smtpHost, $smtpPort)
-    {
-        return Swift_Mailer::newInstance(Swift_SmtpTransport::newInstance($smtpHost, $smtpPort));
-    }
-
-    /**
-     * @param $subject
-     * @param $sender
-     * @param $recipient
-     * @param $body
-     * @return Swift_Message
-     */
-    private function createMessage($subject, $sender, $recipient, $body)
-    {
-        $msg = Swift_Message::newInstance($subject);
-        $msg
-            ->setFrom($sender)
-            ->setTo([$recipient])
-            ->setBody($body)
-        ;
-
-        return $msg;
+        $this->notifier->send($msg);
     }
 }
