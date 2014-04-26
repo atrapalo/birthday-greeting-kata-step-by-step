@@ -29,15 +29,16 @@ class BirthdayService
         $employees = $this->repository->findEmployeesWhoseBirthdayIs($xDate);
 
         foreach ($employees as $employee) {
-            $recipient = $employee->getEmail();
-            $body = sprintf('Happy Birthday, dear %s!', $employee->getFirstName());
-            $subject = 'Happy Birthday!';
-            $this->sendMessage('sender@here.com', $subject, $body, $recipient);
+            $this->sendGreetingTo($employee);
         }
     }
 
-    private function sendMessage($sender, $subject, $body, $recipient)
+    private function sendGreetingTo(Employee $anEmployee)
     {
-        $this->notifier->send($subject, $sender, $recipient, $body);
+        $recipient = $anEmployee->getEmail();
+        $body = sprintf('Happy Birthday, dear %s!', $anEmployee->getFirstName());
+        $subject = 'Happy Birthday!';
+
+        $this->notifier->send($subject, 'sender@here.com', $recipient, $body);
     }
 }
