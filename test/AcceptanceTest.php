@@ -23,7 +23,7 @@ class AcceptanceTest extends PHPUnit_Framework_TestCase
 
         $this->service = new BirthdayService(
             new FileEmployeeRepository(__DIR__ . '/resources/employee_data.txt'),
-            $this->messageSenderSpy
+            new Notifier($this->messageSenderSpy)
         );
     }
 
